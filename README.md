@@ -10,17 +10,19 @@
 将此文件放到和taesync.exe同目录下，运行即可。<br>  
 
 ##下载地址：<br>
-Release下或者<a href="http://7xljcn.com1.z0.glb.clouddn.com/taesync's%20gui.exe">点此</a>
-
+Release下或者<a href="http://7xljcn.com1.z0.glb.clouddn.com/taesync's%20gui.exe">点此</a><br>  
+<a href="http://imagedemo.file.alimmdn.com/doc/%E6%90%AC%E5%AE%B6%E5%B7%A5%E5%85%B7/windows-x64.zip?spm=0.0.0.0.dOFzh6&t">官方工具下载地址（Windows版本）</a><br>
 
 ##已知问题：<br>  
 如果同目录不存在百川的默认config文件夹，将会导致运行时错误。<br>  
 
 ##未来开发计划：<br>  
-以Tab Control的形式提供七牛云、又拍云的配置，跟进官方命令行工具的开发进度。<br>  
-
+1.以Tab Control的形式提供七牛云、又拍云的配置，跟进官方命令行工具的开发进度。
+2.提供读取配置文件功能（其实只是加一个UpdateData(TRUE)而已，我懒得commit了）<br> 
+3.星号的secret key、access key<br>
 ##其他：<br>  
-本人的第一个真正有意义的项目！<br>  
+本人的第一个真正有意义的项目！<br>
+<a href="https://www.bennythink.com/taesync-gui.html">更多信息见我的博客</a><br>  
 
 ##许可证：<br> 
 The MIT License (MIT)
