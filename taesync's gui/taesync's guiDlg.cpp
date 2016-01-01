@@ -81,6 +81,8 @@ BEGIN_MESSAGE_MAP(CtaesyncsguiDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON1, &CtaesyncsguiDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CtaesyncsguiDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_OPEN_BUTTON, &CtaesyncsguiDlg::OnBnClickedOpenButton)
+	ON_BN_CLICKED(IDC_DIR_BUTTON, &CtaesyncsguiDlg::OnBnClickedDirButton)
 END_MESSAGE_MAP()
 
 
@@ -200,8 +202,8 @@ void CtaesyncsguiDlg::OnBnClickedButton1()
 
 	}
 	catch(CFileException e){
-		//oo
-		MessageBox("Open failed when write.");
+		
+		MessageBox("打开文件错误");
 	}
 
 	int len = strMsg.GetLength();
@@ -216,8 +218,14 @@ void CtaesyncsguiDlg::OnBnClickedButton1()
 
 
 void CtaesyncsguiDlg::OnBnClickedButton2()
-{	//开始上传
+{	//上传
 
+	//判断是否使用默认配置文件
+	if (conf_name=="")
+	conf_name="conf.properties";
+	else
+		UpdateData(TRUE);
+	
 	//获取当前绝对路径并加以修饰
 	
 	CString path;
@@ -259,3 +267,85 @@ void CtaesyncsguiDlg::OnBnClickedButton2()
 	
 	// TODO: 在此添加控件通知处理程序代码
 }
+
+
+void CtaesyncsguiDlg::OnBnClickedOpenButton()
+{
+	// 选择配置文件
+
+	// 设置过滤器   
+	TCHAR szFilter[] = _T("配置文件(*.*)|*.*||");   
+	// 构造打开文件对话框   
+	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
+	CString strFilePath;   
+
+	// 显示打开文件对话框   
+	if (IDOK == fileDlg.DoModal())   
+	{   
+		// 如果点击了文件对话框上的“打开”按钮，则将选择的文件路径显示到编辑框里   
+		strFilePath = fileDlg.GetFileName();   
+		SetDlgItemText(IDC_EDIT7, strFilePath); 
+		conf_name=strFilePath;
+	
+	}   
+
+	//读取配置文件
+
+
+
+
+
+
+
+
+
+
+}
+
+
+void CtaesyncsguiDlg::OnBnClickedDirButton()
+{
+	// 选择目录
+
+	
+	char szPath[MAX_PATH];     //存放选择的目录路径   
+	CString select_dir;  
+
+	ZeroMemory(szPath, sizeof(szPath));     
+
+	BROWSEINFO bi;     
+	bi.hwndOwner = m_hWnd;     
+	bi.pidlRoot = NULL;     
+	bi.pszDisplayName = szPath;     
+	bi.lpszTitle = "请选择需要打包的目录：";     
+	bi.ulFlags = 0;     
+	bi.lpfn = NULL;     
+	bi.lParam = 0;     
+	bi.iImage = 0;     
+	//弹出选择目录对话框  
+	LPITEMIDLIST lp = SHBrowseForFolder(&bi);     
+	
+	
+		
+	
+	 
+	 if(lp && SHGetPathFromIDList(lp, szPath))     
+	 {  
+		for(int i=0;i<=MAX_PATH;i++)
+			if (szPath[i]=='\\')
+			szPath[i]='/';
+			
+		select_dir.Format("%s",  szPath);  
+		SetDlgItemText(IDC_EDIT1, select_dir); 
+		 src=select_dir;
+	}  
+	 else     
+		 MessageBox("无效的目录，请重新选择");     
+}    
+
+
+	  
+
+	
+
+

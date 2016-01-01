@@ -42,4 +42,6 @@ public:
 	afx_msg void OnBnClickedButton2();
 	// ÅäÖÃÎÄ¼şÃû
 	CString conf_name;
+	afx_msg void OnBnClickedOpenButton();
+	afx_msg void OnBnClickedDirButton();
 };
