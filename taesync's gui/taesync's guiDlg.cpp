@@ -6,7 +6,10 @@
 #include "taesync's gui.h"
 #include "taesync's guiDlg.h"
 #include "afxdialogex.h"
+#include "Config.h"
+#include <shlwapi.h>
 #include <fstream>
+#pragma comment(lib,"Shlwapi.lib")
 
 
 #ifdef _DEBUG
@@ -52,13 +55,7 @@ END_MESSAGE_MAP()
 
 CtaesyncsguiDlg::CtaesyncsguiDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CtaesyncsguiDlg::IDD, pParent)
-	, src(_T(""))
-	, name(_T(""))
-	, access_key(_T(""))
-	, secret_key(_T(""))
-	, dir(_T(""))
-	, bandwidth(_T(""))
-	, conf_name(_T(""))
+	, main_src(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -66,23 +63,16 @@ CtaesyncsguiDlg::CtaesyncsguiDlg(CWnd* pParent /*=NULL*/)
 void CtaesyncsguiDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_EDIT1, src);
-	DDX_Text(pDX, IDC_EDIT5, name);
-	DDX_Text(pDX, IDC_EDIT3, access_key);
-	DDX_Text(pDX, IDC_EDIT4, secret_key);
-	DDX_Text(pDX, IDC_EDIT2, dir);
-	DDX_Text(pDX, IDC_EDIT6, bandwidth);
-	DDX_Text(pDX, IDC_EDIT7, conf_name);
+	DDX_Text(pDX, IDC_EDIT1, main_src);
 }
 
 BEGIN_MESSAGE_MAP(CtaesyncsguiDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON1, &CtaesyncsguiDlg::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2, &CtaesyncsguiDlg::OnBnClickedButton2)
-	ON_BN_CLICKED(IDC_OPEN_BUTTON, &CtaesyncsguiDlg::OnBnClickedOpenButton)
-	ON_BN_CLICKED(IDC_DIR_BUTTON, &CtaesyncsguiDlg::OnBnClickedDirButton)
+	ON_BN_CLICKED(IDC_BUTTON_SET, &CtaesyncsguiDlg::OnBnClickedButtonSet)
+	ON_BN_CLICKED(IDC_BUTTON_BROW, &CtaesyncsguiDlg::OnBnClickedButtonBrow)
+	ON_BN_CLICKED(IDC_BUTTON_UP, &CtaesyncsguiDlg::OnBnClickedButtonUp)
 END_MESSAGE_MAP()
 
 
@@ -91,6 +81,40 @@ END_MESSAGE_MAP()
 BOOL CtaesyncsguiDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	CStdioFile inFile;
+	CString text;
+	//检查配置文件是否存在
+	if (!PathFileExists("conf.properties"))
+	{
+		MessageBox("配置文件不存在，请创建！","第一次运行",MB_ICONWARNING);
+		CConfig new_set;
+		new_set.DoModal();
+
+		//将路径放置到父文本框中
+		inFile.Open("conf.properties",CFile::modeRead);
+		inFile.ReadString(text);
+		text.Replace("src=","");
+		SetDlgItemText(IDC_EDIT1, text);
+		inFile.Close();    
+
+	}
+	else{
+		//读取默认配置
+		inFile.Open("conf.properties",CFile::modeRead);
+		inFile.ReadString(text);
+		text.Replace("src=","");
+		SetDlgItemText(IDC_EDIT1, text);
+		inFile.Close();
+	}
+
+	//修改group box为使用默认配置
+	SetDlgItemText(IDC_GROUPBOX1,_T("使用默认目录"));
+	//修改父文本框
+
+
+
+
 
 	// 将“关于...”菜单项添加到系统菜单中。
 
@@ -173,77 +197,127 @@ HCURSOR CtaesyncsguiDlg::OnQueryDragIcon()
 
 
 
-void CtaesyncsguiDlg::OnBnClickedButton1()
-{	//生成配置文件	
-	
-	UpdateData(TRUE);  //获取用户输入
-	if (dir=="")
-	dir="/";	//默认百川路径
-	if(bandwidth=="")
-	bandwidth="1024";	//默认速度
-	if(conf_name=="")
-	conf_name="conf.properties";	//默认配置文件名
-
-	
-	CString f_out="src=";
-	f_out=f_out+src+"\r\nnamespace="+name+"\r\naccessKey="+access_key+
-		"\r\nsecretKey="+secret_key+"\r\ndstDir="+dir+"\r\nisDebug=true\r\nbandWidthLimit="
-		+bandwidth;
-
-	CString strMsg;
-	strMsg.Format("%s",f_out);
+void CtaesyncsguiDlg::OnBnClickedButtonSet()
+{
+	// 设置
+	CConfig x;
+	x.DoModal();
 
 
-	//将配置文件保存到文件中
-	
-	CFile cf;
-	try{
-		cf.Open(("config\\"+conf_name), CFile::modeCreate|CFile::modeWrite);
 
-	}
-	catch(CFileException e){
-		
-		MessageBox("打开文件错误");
-	}
 
-	int len = strMsg.GetLength();
-	cf.Write(strMsg.GetBuffer(len), len);
-	cf.Close();
-	strMsg.ReleaseBuffer();
-
-	MessageBox("配置文件路径为config\\"+conf_name+"\r\n"+strMsg,"配置文件已保存",MB_ICONINFORMATION);
-
-	
 }
 
 
-void CtaesyncsguiDlg::OnBnClickedButton2()
-{	//上传
+void CtaesyncsguiDlg::OnBnClickedButtonBrow()
+{
+	// 浏览上传目录
 
-	//判断是否使用默认配置文件
-	if (conf_name=="")
-	conf_name="conf.properties";
+	char szPath[MAX_PATH];     //存放选择的目录路径   
+	CString upselect_dir;  
+	ZeroMemory(szPath, sizeof(szPath));     
+	BROWSEINFO bi;     
+	bi.hwndOwner = m_hWnd;     
+	bi.pidlRoot = NULL;     
+	bi.pszDisplayName = szPath;     
+	bi.lpszTitle = "请选择需要上传的目录：";     
+	bi.ulFlags = 0;     
+	bi.lpfn = NULL;     
+	bi.lParam = 0;     
+	bi.iImage = 0;     
+	//弹出选择目录对话框  
+	LPITEMIDLIST lp = SHBrowseForFolder(&bi);     
+	if(lp && SHGetPathFromIDList(lp, szPath))     
+	{  
+		for(int i=0;i<=MAX_PATH;i++)
+			if (szPath[i]=='\\')
+				szPath[i]='/';
+		upselect_dir.Format("%s",  szPath);  
+		SetDlgItemText(IDC_EDIT1, upselect_dir); 
+		SetDlgItemText(IDC_GROUPBOX1,_T("使用自定义目录"));
+
+	}  
+	else     
+		MessageBox("无效的目录，请重新选择"); 
+
+}
+
+
+void CtaesyncsguiDlg::OnBnClickedButtonUp()
+{
+	// 上传代码
+
+	//获取执行参数
+
+	CString exe_path;
+	char   c_path[MAX_PATH];  
+	GetCurrentDirectory(MAX_PATH,c_path);
+	exe_path.Format("%s",c_path);
+	exe_path.Replace("\\","/");
+	exe_path="-local "+exe_path+"/conf.properties";
+	//MessageBox(exe_path);
+
+	//判断是默认还是自定义
+	CString main_ifdefault;
+	GetDlgItemText(IDC_GROUPBOX1,main_ifdefault);
+
+	//选择不同的执行逻辑
+	int call_result=33;    //判断调用结果
+
+	if(main_ifdefault=="使用默认目录")
+		call_result=int(ShellExecute(NULL,"open","taesync.exe",exe_path,NULL,SW_SHOWNORMAL));
 	else
+	{	//用户自定义了目录，要重新配置文件了
+		//先更新下文本框的内容
 		UpdateData(TRUE);
-	
-	//获取当前绝对路径并加以修饰
-	
-	CString path;
-	GetModuleFileName(NULL,path.GetBufferSetLength(MAX_PATH+1),MAX_PATH);
-	path.ReleaseBuffer();
-	int pos = path.ReverseFind('\\');
-	path = path.Left(pos);
-	path="-local "+path+"\\config\\"+conf_name;
+		CStdioFile inFile;
+		CString main_newconf;
+		CString text;			//读取的每一行都变化的
+		inFile.Open("conf.properties",CFile::modeRead);		//定义infile对象，读取并修改src参数
 
-	//MessageBox(path,"执行参数",MB_ICONINFORMATION);
+		inFile.ReadString(text);		//读取第1行src=F:/test并根据文本框修改
+		main_newconf="src="+main_src+"\r\n";
+		inFile.ReadString(text);				//第2行namespace照样添加
+		main_newconf=main_newconf+text+"\r\n";
+		inFile.ReadString(text);				//第3行ak照样添加
+		main_newconf=main_newconf+text+"\r\n";
+		inFile.ReadString(text);				//第4行sk照样添加
+		main_newconf=main_newconf+text+"\r\n";
+		inFile.ReadString(text);				//第5行dst照样添加
+		main_newconf=main_newconf+text+"\r\n";
+		inFile.ReadString(text);				//第6行debug照样添加
+		main_newconf=main_newconf+text+"\r\n";
+		inFile.ReadString(text);				//第7行bandwidth照样添加
+		main_newconf=main_newconf+text;
+		inFile.Close();							//结束读文件
 
 
-	//调用是否成功的判断
+		//新配置文件正确
+
+
+		//要写入文件的字符串为main_newconf
+		CFile cf;
+		try{
+			cf.Open("conf.properties", CFile::modeCreate|CFile::modeWrite);
+		}
+		catch(CFileException e){
+			MessageBox("打开文件错误");
+		}
+
+		int len = main_newconf.GetLength();
+		cf.Write(main_newconf.GetBuffer(len), len);
+
+		main_newconf.ReleaseBuffer();
+		cf.Close();
+		MessageBox("配置文件为conf.properties\r\n"+main_newconf,"配置文件已保存",MB_ICONINFORMATION);
+		//重写结束,调用
+		call_result=int(ShellExecute(NULL,"open","taesync.exe",exe_path,NULL,SW_SHOWNORMAL));
+
+	}
+
+
+	//判断调用结果
 	CString display_result;
-	int call_result=33;
-
-	call_result=int(ShellExecute(NULL,"open","taesync.exe",path,NULL,SW_SHOWNORMAL));
-
 	display_result.Format("%d", call_result); 
 
 	if(call_result<=32)
@@ -255,97 +329,4 @@ void CtaesyncsguiDlg::OnBnClickedButton2()
 		case 11:MessageBox("请重新下载taesync.exe","exe文件无效",MB_ICONWARNING);break;
 		default:MessageBox("请确保taesync.exe有效","未知错误",MB_ICONWARNING);break;
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	// TODO: 在此添加控件通知处理程序代码
 }
-
-
-void CtaesyncsguiDlg::OnBnClickedOpenButton()
-{
-	// 选择配置文件
-
-	// 设置过滤器   
-	TCHAR szFilter[] = _T("配置文件(*.*)|*.*||");   
-	// 构造打开文件对话框   
-	CFileDialog fileDlg(TRUE, _T("txt"), NULL, 0, szFilter, this);   
-	CString strFilePath;   
-
-	// 显示打开文件对话框   
-	if (IDOK == fileDlg.DoModal())   
-	{   
-		// 如果点击了文件对话框上的“打开”按钮，则将选择的文件路径显示到编辑框里   
-		strFilePath = fileDlg.GetFileName();   
-		SetDlgItemText(IDC_EDIT7, strFilePath); 
-		conf_name=strFilePath;
-	
-	}   
-
-	//读取配置文件
-
-
-
-
-
-
-
-
-
-
-}
-
-
-void CtaesyncsguiDlg::OnBnClickedDirButton()
-{
-	// 选择目录
-
-	
-	char szPath[MAX_PATH];     //存放选择的目录路径   
-	CString select_dir;  
-
-	ZeroMemory(szPath, sizeof(szPath));     
-
-	BROWSEINFO bi;     
-	bi.hwndOwner = m_hWnd;     
-	bi.pidlRoot = NULL;     
-	bi.pszDisplayName = szPath;     
-	bi.lpszTitle = "请选择需要打包的目录：";     
-	bi.ulFlags = 0;     
-	bi.lpfn = NULL;     
-	bi.lParam = 0;     
-	bi.iImage = 0;     
-	//弹出选择目录对话框  
-	LPITEMIDLIST lp = SHBrowseForFolder(&bi);     
-	
-	
-		
-	
-	 
-	 if(lp && SHGetPathFromIDList(lp, szPath))     
-	 {  
-		for(int i=0;i<=MAX_PATH;i++)
-			if (szPath[i]=='\\')
-			szPath[i]='/';
-			
-		select_dir.Format("%s",  szPath);  
-		SetDlgItemText(IDC_EDIT1, select_dir); 
-		 src=select_dir;
-	}  
-	 else     
-		 MessageBox("无效的目录，请重新选择");     
-}    
-
-
-	  
-
-	
-
-

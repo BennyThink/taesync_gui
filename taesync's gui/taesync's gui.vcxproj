@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CCC2A32A-36C2-4A60-AFA0-21B744A6A8CF}</ProjectGuid>
+    <ProjectGuid>{7246459F-F5EA-445C-A21E-4486DE93CE8D}</ProjectGuid>
     <RootNamespace>taesyncsgui</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
@@ -99,6 +99,7 @@
     <None Include="res\taesyncsgui.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="taesync%27s gui.h" />
@@ -106,6 +107,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
