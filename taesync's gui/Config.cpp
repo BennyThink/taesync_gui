@@ -81,8 +81,9 @@ void CConfig::OnBnClickedButtonMake()
 		try{
 			cf.Open("conf.properties", CFile::modeCreate|CFile::modeWrite);
 		}
-		catch(CFileException e){
+		catch(CFileException *e){
 			MessageBox("打开文件错误");
+			delete e;
 		}
 
 		int len = set_string.GetLength();
