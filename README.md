@@ -18,8 +18,8 @@ Release下或者<a href="http://7xljcn.com1.z0.glb.clouddn.com/taesync's%20gui.e
 ##开发计划：<br>  
 修bug<br> 
 
-##其他：<br>  
-本人的第一个真正有意义的项目！<br>  
+##其他：<br>  
+一时脑残！<br>  
 
 ##许可证：<br> 
 The MIT License (MIT)
