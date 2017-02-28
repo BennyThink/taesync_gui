@@ -10,7 +10,7 @@
 将此文件放到和taesync.exe同目录下，运行即可。<br>  
 
 ##下载地址：<br>
-Release下或者<a href="http://7xljcn.com1.z0.glb.clouddn.com/taesync's%20gui.exe">点此</a>
+Release下
 
 ##已知问题：<br>  
 不支持中文目录、新设置无法更新文本框。<br>  
